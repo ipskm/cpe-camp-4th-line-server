@@ -10,8 +10,9 @@ const runtimeOpts = {
   timeoutSeconds: 4,
   memory: "2GB"
 };
-
+// Imports the Google Cloud client libraries
 const vision = require('@google-cloud/vision');
+// Creates a client
 const client = new vision.ImageAnnotatorClient();
 
 //line header
@@ -96,49 +97,48 @@ const doImage = async (event) => {
   });
 }
 
-exports.logoDetection = functions.region(region).runWith(runtimeOpts)
+exports.landmarkDetection = functions.region(region).runWith(runtimeOpts)
   .storage.object()
   .onFinalize(async (object) => {
   const fileName = object.name // ดึงชื่อไฟล์มา
   const userId = fileName.split('.')[0] // แยกชื่อไฟล์ออกมา ซึ่งมันก็คือ userId
-  
+
   // ทำนายโลโกที่อยู่ในภาพด้วย Cloud Vision API
-  const [result] = await client.logoDetection(`gs://${object.bucket}/${fileName}`);
-  const logos = result.logoAnnotations;
+  const [result] = await client.landmarkDetection(`gs://${object.bucket}/${fileName}`)
+  const landmarks = result.landmarkAnnotations;
   
   // เอาผลลัพธ์มาเก็บใน array ซึ่งเป็นโครงสร้างของ Quick Reply
   let itemArray = []
-  logos.forEach(logo => {
-    if (logo.score >= 0.7) { // ค่าความแม่นยำของการทำนายต้องได้ตั้งแต่ 70% ขึ้นไป
+  landmarks.forEach(landmark => {
+    if (landmark.score >= 0.7) {
       itemArray.push({
         type: 'action',
         action: {
-          type: 'postback', // action ประเภท postback
-          label: logo.description, // ชื่อที่จะแสดงในปุ่ม Quick Reply
-          data: `team=${logo.description}`, // ส่งข้อมูลทีมกลับไปแบบลับๆ
-          displayText: logo.description // ชื่อที่จะถูกส่งเข้าห้องแชทหลังจากคลิกปุ่ม Quick Reply
+          type: 'postback',
+          label: landmark.description,
+          data: `team=${landmark.description}`,
+          displayText: landmark.description
         }
       });
     }
   })
   
   // กำหนดตัวแปรมา 2 ตัว
-  let msg = '';
-  let quickItems = null;
+  let msg = ''
+  let quickItems = null
   
   // ตรวจสอบว่ามีผลลัพธ์การทำนายหรือไม่
   if (itemArray.length > 0) {
-    msg = 'ผลทำนายมีดังนี้';
-    quickItems = { items: itemArray };
+    msg = 'สถานที่นี้คือ'
+    quickItems = { items: itemArray }
   } else {
-    msg = 'ไม่พบโลโกในภาพ ลองส่งรูปมาใหม่ซิ';
-    quickItems = null;
+    msg = 'ไม่รู้จักสถานที่นี้ โปรดลองใหม่อีกครั้ง'
+    quickItems = null
   }
   
   // ส่งข้อความหาผู้ใช้ว่าพบโลโกหรือไม่ พร้อม Quick Reply(กรณีมีผลการทำนาย)
   push(userId, msg, quickItems)
-});
-
+})
 
 const push = (userId, msg, quickItems) => {
   return request.post({
