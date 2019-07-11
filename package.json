@@ -1,0 +1,22 @@
+{
+  "name": "cpe-camp-4th-line-server",
+  "version": "1.0.0",
+  "description": "line bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ipskm/cpe-camp-4th-line-server.git"
+  },
+  "author": "Phongsakorn",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ipskm/cpe-camp-4th-line-server/issues"
+  },
+  "homepage": "https://github.com/ipskm/cpe-camp-4th-line-server#readme",
+  "dependencies": {
+    "firebase-tools": "^7.0.2"
+  }
+}
