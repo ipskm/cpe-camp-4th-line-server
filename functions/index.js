@@ -93,7 +93,7 @@ const doImage = async (event) => {
   // ตอบกลับเพื่อ handle UX เนื่องจากทั้งดาวน์โหลดและอัพโหลดต้องใช้เวลา
   reply(event.replyToken, {
     type: 'text',
-    text: 'บันทึกรูปเรียบร้อย'
+    text: 'รอแปปนะตะเอง'
   });
 }
 
@@ -114,10 +114,10 @@ exports.landmarkDetection = functions.region(region).runWith(runtimeOpts)
       itemArray.push({
         type: 'action',
         action: {
-          type: 'postback',
+          type: 'message',
           label: landmark.description,
           data: `team=${landmark.description}`,
-          displayText: landmark.description
+          text: landmark.description
         }
       });
     }
@@ -129,7 +129,7 @@ exports.landmarkDetection = functions.region(region).runWith(runtimeOpts)
   
   // ตรวจสอบว่ามีผลลัพธ์การทำนายหรือไม่
   if (itemArray.length > 0) {
-    msg = 'สถานที่นี้คือ'
+    msg = 'สถานที่นี้คือ : '
     quickItems = { items: itemArray }
   } else {
     msg = 'ไม่รู้จักสถานที่นี้ โปรดลองใหม่อีกครั้ง'
@@ -148,8 +148,8 @@ const push = (userId, msg, quickItems) => {
       to: userId,
       messages: [{
         type: "text",
-        text: msg,
-        quickReply: quickItems
+        text: msg + quickItems.items[0].action.text
+        //quickReply: 
       }]
     })
   })
